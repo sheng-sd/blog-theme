@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <meta name="keywords" content="{{keyWords}}">
+    <meta name="description" content="生生山海的博客 - 记录经验与分享">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{OPT.themeURL}}combined.css">
+    {{{OPT.codeBeforHead}}}
+</head>
+<body>
+    <div id="reading-progress"></div>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="site-logo">生生山海</a>
+            <nav class="site-nav" id="siteNav">
+                <a href="/">首页</a>
+                {{#widgetMenuList}}
+                <a href="{{url}}">{{title}}</a>
+                {{/widgetMenuList}}
+                {{#widgetCategoryList}}
+                <a href="/category/{{.}}">{{.}}</a>
+                {{/widgetCategoryList}}
+            </nav>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题">☀️</button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="site-main">
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- Article List -->
+                <div class="article-list">
+                    {{#articleList}}
+                    <article class="article-card">
+                        <div class="article-meta">
+                            {{#category}}
+                            <span class="category">{{.}}</span>
+                            {{/category}}
+                            <span class="date">📅 {{createDate10}}</span>
+                            <span>📖 约{{contentLength}}字</span>
+                        </div>
+                        <h2 class="article-title">
+                            <a href="{{url}}">{{title}}</a>
+                        </h2>
+                        <p class="article-excerpt">{{contentText}}...</p>
+                        <div class="article-footer">
+                            <div class="article-tags">
+                                {{#tags}}
+                                <a href="/tags/{{.}}" class="tag">#{{.}}</a>
+                                {{/tags}}
+                            </div>
+                            <a href="{{url}}" class="read-more">阅读全文 →</a>
+                        </div>
+                    </article>
+                    {{/articleList}}
+
+                    {{^articleList}}
+                    <div class="article-card" style="text-align:center;padding:3rem;">
+                        <p style="font-size:1.2rem;color:var(--text-muted);">暂无文章</p>
+                    </div>
+                    {{/articleList}}
+
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        {{#pageNewer}}
+                        <a href="{{url}}">← {{title}}</a>
+                        {{/pageNewer}}
+                        {{#pageOlder}}
+                        <a href="{{url}}">{{title}} →</a>
+                        {{/pageOlder}}
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <!-- Profile -->
+                    <div class="widget profile-widget">
+                        <div class="profile-avatar">🌊</div>
+                        <div class="profile-name">生生山海</div>
+                        <div class="profile-bio">记录经验，分享技术</div>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="widget">
+                        <h3 class="widget-title">搜索</h3>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="搜索文章..." onkeydown="if(event.key==='Enter')doSearch()">
+                        </div>
+                    </div>
+
+                    <!-- Recent Posts -->
+                    <div class="widget">
+                        <h3 class="widget-title">最新文章</h3>
+                        <ul>
+                            {{#widgetRecentlyList}}
+                            <li><a href="{{url}}">📝 {{title}}</a></li>
+                            {{/widgetRecentlyList}}
+                        </ul>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="widget">
+                        <h3 class="widget-title">分类</h3>
+                        <ul>
+                            {{#widgetCategoryList}}
+                            <li><a href="/category/{{.}}">📂 {{.}}</a></li>
+                            {{/widgetCategoryList}}
+                        </ul>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="widget">
+                        <h3 class="widget-title">标签</h3>
+                        <div class="tags-cloud">
+                            {{#widgetTagsList}}
+                            <a href="/tags/{{.}}" class="tag">#{{.}}</a>
+                            {{/widgetTagsList}}
+                        </div>
+                    </div>
+
+                    <!-- Recent Comments -->
+                    <div class="widget">
+                        <h3 class="widget-title">最新评论</h3>
+                        <div id="waline-recent"></div>
+                    </div>
+
+                    <!-- Links -->
+                    {{#widgetLinkList.length}}
+                    <div class="widget">
+                        <h3 class="widget-title">友情链接</h3>
+                        <ul>
+                            {{#widgetLinkList}}
+                            <li><a href="{{url}}" target="_blank" rel="noopener">🔗 {{title}}</a></li>
+                            {{/widgetLinkList}}
+                        </ul>
+                    </div>
+                    {{/widgetLinkList.length}}
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2024 生生山海的博客 | Powered by <a href="https://github.com/gdtool/cloudflare-workers-blog" target="_blank">CF Blog</a></p>
+            <p style="margin-top:0.5rem;font-size:0.8rem;">
+                <span id="busuanzi_container_site_pv">本站总访问量 <span id="busuanzi_value_site_pv"></span> 次</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部">↑</button>
+
+    {{{OPT.codeBeforBody}}}
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
+        });
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const siteNav = document.getElementById('siteNav');
+        mobileMenuBtn.addEventListener('click', () => {
+            siteNav.classList.toggle('active');
+        });
+
+        // Back to Top
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Search
+        function doSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                window.location.href = '/search/' + encodeURIComponent(query);
+            }
+        }
+    </script>
+</body>
+</html>
