@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <meta name="keywords" content="{{keyWords}}">
+    <meta name="description" content="{{articleSingle.contentText}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{OPT.themeURL}}combined.css">
+    {{{OPT.codeBeforHead}}}
+</head>
+<body>
+    <div id="reading-progress"></div>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="site-logo">生生山海</a>
+            <nav class="site-nav" id="siteNav">
+                <a href="/">首页</a>
+                {{#widgetMenuList}}
+                <a href="{{url}}">{{title}}</a>
+                {{/widgetMenuList}}
+                {{#widgetCategoryList}}
+                <a href="/category/{{.}}">{{.}}</a>
+                {{/widgetCategoryList}}
+            </nav>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题">☀️</button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="site-main">
+        <div class="container">
+            <div class="content-wrapper">
+                <!-- Article -->
+                <div>
+                    <article class="article-single">
+                        <div class="article-header">
+                            <div class="article-meta">
+                                {{#articleSingle.category}}
+                                <span class="category">{{.}}</span>
+                                {{/articleSingle.category}}
+                                <span class="date">📅 {{articleSingle.createDate10}}</span>
+                                <span>📖 约{{articleSingle.contentLength}}字</span>
+                                <span>⏱️ 阅读约{{articleSingle.readTime}}分钟</span>
+                            </div>
+                            <h1 class="article-title">{{articleSingle.title}}</h1>
+                            <div class="article-tags">
+                                {{#articleSingle.tags}}
+                                <a href="/tags/{{.}}" class="tag">#{{.}}</a>
+                                {{/articleSingle.tags}}
+                            </div>
+                        </div>
+
+                        <div class="article-content" id="articleContent">
+                            {{{articleSingle.contentHtml}}}
+                        </div>
+
+                        <!-- Article Navigation -->
+                        <div class="article-nav">
+                            {{#articleNewer}}
+                            <a href="{{url}}">
+                                <div class="nav-label">← 上一篇</div>
+                                <div>{{title}}</div>
+                            </a>
+                            {{/articleNewer}}
+                            {{^articleNewer}}
+                            <div></div>
+                            {{/articleNewer}}
+
+                            {{#articleOlder}}
+                            <a href="{{url}}" style="text-align:right;">
+                                <div class="nav-label">下一篇 →</div>
+                                <div>{{title}}</div>
+                            </a>
+                            {{/articleOlder}}
+                            {{^articleOlder}}
+                            <div></div>
+                            {{/articleOlder}}
+                        </div>
+                    </article>
+
+                    <!-- Comments -->
+                    <div class="comments-section">
+                        <div id="waline"></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <!-- Table of Contents -->
+                    <div class="widget" id="tocWidget" style="display:none;">
+                        <h3 class="widget-title">目录</h3>
+                        <nav id="toc"></nav>
+                    </div>
+
+                    <!-- Recent Posts -->
+                    <div class="widget">
+                        <h3 class="widget-title">最新文章</h3>
+                        <ul>
+                            {{#widgetRecentlyList}}
+                            <li><a href="{{url}}">📝 {{title}}</a></li>
+                            {{/widgetRecentlyList}}
+                        </ul>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="widget">
+                        <h3 class="widget-title">标签</h3>
+                        <div class="tags-cloud">
+                            {{#widgetTagsList}}
+                            <a href="/tags/{{.}}" class="tag">#{{.}}</a>
+                            {{/widgetTagsList}}
+                        </div>
+                    </div>
+
+                    <!-- Recent Comments -->
+                    <div class="widget">
+                        <h3 class="widget-title">最新评论</h3>
+                        <div id="waline-recent"></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2024 生生山海的博客 | Powered by <a href="https://github.com/gdtool/cloudflare-workers-blog" target="_blank">CF Blog</a></p>
+            <p style="margin-top:0.5rem;font-size:0.8rem;">
+                <span id="busuanzi_container_page_pv">本文阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" aria-label="返回顶部">↑</button>
+
+    {{{OPT.codeBeforBody}}}
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
+        });
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const siteNav = document.getElementById('siteNav');
+        mobileMenuBtn.addEventListener('click', () => {
+            siteNav.classList.toggle('active');
+        });
+
+        // Reading Progress Bar
+        const progressBar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + '%';
+        });
+
+        // Back to Top
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Table of Contents
+        function generateTOC() {
+            const content = document.getElementById('articleContent');
+            const toc = document.getElementById('toc');
+            const tocWidget = document.getElementById('tocWidget');
+            const headings = content.querySelectorAll('h1, h2, h3');
+
+            if (headings.length === 0) return;
+
+            tocWidget.style.display = 'block';
+            let tocHTML = '<ul style="list-style:none;padding:0;">';
+            headings.forEach((heading, index) => {
+                const id = 'heading-' + index;
+                heading.id = id;
+                const level = heading.tagName.toLowerCase();
+                const indent = level === 'h2' ? 'padding-left:0;' : 'padding-left:1rem;';
+                tocHTML += '<li style="' + indent + 'margin:0.4rem 0;"><a href="#' + id + '" style="color:var(--text-secondary);text-decoration:none;font-size:0.85rem;transition:color 0.2s;" onmouseover="this.style.color=\'var(--primary)\'" onmouseout="this.style.color=\'var(--text-secondary)\'">' + heading.textContent + '</a></li>';
+            });
+            tocHTML += '</ul>';
+            toc.innerHTML = tocHTML;
+        }
+        generateTOC();
+
+        // Image Lazy Loading & Lightbox
+        document.querySelectorAll('.article-content img').forEach(img => {
+            img.loading = 'lazy';
+            img.style.cursor = 'pointer';
+            img.addEventListener('click', () => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                const clone = img.cloneNode(true);
+                clone.style.cssText = 'max-width:90%;max-height:90%;object-fit:contain;';
+                overlay.appendChild(clone);
+                overlay.addEventListener('click', () => overlay.remove());
+                document.body.appendChild(overlay);
+            });
+        });
+
+        // Code Block Copy Button
+        document.querySelectorAll('.article-content pre').forEach(pre => {
+            const btn = document.createElement('button');
+            btn.textContent = '复制';
+            btn.style.cssText = 'position:absolute;top:0.5rem;right:0.5rem;padding:0.3rem 0.6rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#e2e8f0;font-size:0.75rem;cursor:pointer;transition:all 0.2s;';
+            btn.addEventListener('mouseover', () => btn.style.background = 'rgba(255,255,255,0.2)');
+            btn.addEventListener('mouseout', () => btn.style.background = 'rgba(255,255,255,0.1)');
+            btn.addEventListener('click', () => {
+                const code = pre.querySelector('code') || pre;
+                navigator.clipboard.writeText(code.textContent).then(() => {
+                    btn.textContent = '已复制!';
+                    setTimeout(() => btn.textContent = '复制', 2000);
+                });
+            });
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+        });
+    </script>
+</body>
+</html>
